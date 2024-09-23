@@ -26,11 +26,11 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Initialize Terraform
-      run: cd cloud_infra/dev && terraform init
+      run: cd deploy/dev && terraform init
 
     - name: Terraform Plan
-      run: cd cloud_infra/dev && terraform plan -out=tfplan
+      run: cd deploy/dev && terraform plan -out=tfplan
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main'
-      run: cd cloud_infra/dev && terraform apply -auto-approve tfplan
+      run: cd deploy/dev && terraform apply -auto-approve tfplan
