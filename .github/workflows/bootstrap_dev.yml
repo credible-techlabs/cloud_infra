@@ -1,0 +1,37 @@
+name: 'dev_infra_pipeline'
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: azure login
+      uses: azure/login@v2
+      with:
+        credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: azure group create
+      run: |
+        az group create --name medx_base --location <location>
+
+    - name: azure storage account create
+      run: |
+        az storage account create --resource-group medx_base --name bootstrapdev0001  --sku Standard_LRS  --encryption-services blob  --kind StorageV2
+
+    - name: azure storage container create
+      run: |
+        az storage container create --account-name bootstrapdev0001 --name terraform
