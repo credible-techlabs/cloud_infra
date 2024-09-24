@@ -24,17 +24,17 @@ jobs:
       - name: Create Resource Group (if not exists)
         id: create_rg
         run: |
-          az group show --name ${{ secrets.AZ_BASE_RESOURCE_GROUP }} || az group create --name ${{ secrets.AZ_BASE_RESOURCE_GROUP }} --location ${{ secrets.AZ_BASE_LOCATION }}
+          az group show --name ${{ vars.AZ_BASE_RESOURCE_GROUP }} || az group create --name ${{ vars.AZ_BASE_RESOURCE_GROUP }} --location ${{ vars.AZ_BASE_LOCATION }}
 
       - name: Create Storage Account (if not exists)
         id: create_storage_account
         run: |
-          az storage account show --name ${{ secrets.AZ_BASE_STORAGE }} --resource-group ${{ secrets.AZ_BASE_RESOURCE_GROUP }} || az storage account create --resource-group ${{ secrets.AZ_BASE_RESOURCE_GROUP }} --name ${{ secrets.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
+          az storage account show --name ${{ vars.AZ_BASE_STORAGE }} --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} || az storage account create --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} --name ${{ secrets.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
 
       - name: Create Storage Container (if not exists)
         id: create_storage_container
         run: |
-          az storage container show --name ${{ secrets.AZ_BASE_CONTAINER }} --account-name ${{ secrets.AZ_BASE_STORAGE }} || az storage container create --account-name ${{ secrets.AZ_BASE_STORAGE }} --name ${{ secrets.AZ_BASE_CONTAINER }}
+          az storage container show --name ${{ vars.AZ_BASE_CONTAINER }} --account-name ${{ vars.AZ_BASE_STORAGE }} || az storage container create --account-name ${{ vars.AZ_BASE_STORAGE }} --name ${{ secrets.AZ_BASE_CONTAINER }}
 
     outputs:
       STORAGE_ACCOUNT_NAME: ${{ steps.create_storage_account.outputs.storage_account_name }}
