@@ -16,30 +16,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Azure Login
-      uses: azure/login@v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIAL }}
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIAL }}
 
-    - name: Create Resource Group (if not exists)
-      id: create_rg
-      run: |
-        az group create --name ${{ vars.AZ_BASE_RESOURCE_GROUP }} --location ${{ vars.AZ_BASE_LOCATION }}
+      - name: Create Resource Group (if not exists)
+        id: create_rg
+        run: |
+          az group show --name ${{ secrets.AZ_BASE_RESOURCE_GROUP }} || az group create --name ${{ secrets.AZ_BASE_RESOURCE_GROUP }} --location ${{ secrets.AZ_BASE_LOCATION }}
 
-    - name: Create Storage Account (if not exists)
-      id: create_storage_account
-      run: |
-        az storage account create --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} --name ${{ vars.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
+      - name: Create Storage Account (if not exists)
+        id: create_storage_account
+        run: |
+          az storage account show --name ${{ secrets.AZ_BASE_STORAGE }} --resource-group ${{ secrets.AZ_BASE_RESOURCE_GROUP }} || az storage account create --resource-group ${{ secrets.AZ_BASE_RESOURCE_GROUP }} --name ${{ secrets.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
 
-    - name: Create Storage Container (if not exists)
-      id: create_storage_container
-      run: |
-        az storage container create --account-name ${{ vars.AZ_BASE_STORAGE }} --name ${{ vars.AZ_BASE_CONTAINER }}
+      - name: Create Storage Container (if not exists)
+        id: create_storage_container
+        run: |
+          az storage container show --name ${{ secrets.AZ_BASE_CONTAINER }} --account-name ${{ secrets.AZ_BASE_STORAGE }} || az storage container create --account-name ${{ secrets.AZ_BASE_STORAGE }} --name ${{ secrets.AZ_BASE_CONTAINER }}
 
     outputs:
-      STORAGE_ACCOUNT_NAME: ${{ vars.AZ_BASE_STORAGE }}
-      RESOURCE_GROUP_NAME: ${{ vars.AZ_BASE_RESOURCE_GROUP }}
-      CONTAINER_NAME: ${{ vars.AZ_BASE_CONTAINER }}
+      STORAGE_ACCOUNT_NAME: ${{ steps.create_storage_account.outputs.storage_account_name }}
+      RESOURCE_GROUP_NAME: ${{ steps.create_rg.outputs.resource_group_name }}
+      CONTAINER_NAME: ${{ steps.create_storage_container.outputs.container_name }}
 
   terraform_apply:
     name: 'Terraform Apply'
@@ -47,45 +47,45 @@ jobs:
     needs: bootstrapping
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
 
-    - name: Terraform Init
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: |
-        cd env/dev/deploy
-        terraform init \
-          -backend-config="storage_account_name=${{ needs.bootstrapping.outputs.STORAGE_ACCOUNT_NAME }}" \
-          -backend-config="container_name=${{ needs.bootstrapping.outputs.CONTAINER_NAME }}" \
-          -backend-config="resource_group_name=${{ needs.bootstrapping.outputs.RESOURCE_GROUP_NAME }}" \
-          -backend-config="key=terraform_dev.tfstate"
+      - name: Terraform Init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        run: |
+          cd env/dev/deploy
+          terraform init \
+            -backend-config="storage_account_name=${{ needs.bootstrapping.outputs.STORAGE_ACCOUNT_NAME }}" \
+            -backend-config="container_name=${{ needs.bootstrapping.outputs.CONTAINER_NAME }}" \
+            -backend-config="resource_group_name=${{ needs.bootstrapping.outputs.RESOURCE_GROUP_NAME }}" \
+            -backend-config="key=terraform_dev.tfstate"
 
-    - name: Terraform Plan
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: |
-        cd env/dev/deploy
-        terraform plan -out=tfplan
+      - name: Terraform Plan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        run: |
+          cd env/dev/deploy
+          terraform plan -out=tfplan
 
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/main'
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      run: |
-        cd env/dev/deploy
-        terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        run: |
+          cd env/dev/deploy
+          terraform apply -auto-approve tfplan
