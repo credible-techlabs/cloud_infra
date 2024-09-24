@@ -54,7 +54,7 @@ jobs:
 
     steps:
       - name: Call Common Pipeline
-        uses: ./.github/workflows/common_one.yml
+        uses: ./.github/workflows/common_one.yml@main
 
       - name: Terraform Init
         env:
