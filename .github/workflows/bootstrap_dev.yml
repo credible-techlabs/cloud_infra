@@ -1,4 +1,4 @@
-name: 'dev_infra_pipeline'
+name: 'dev_bootstrap_pipeline'
 
 on:
   # push:
