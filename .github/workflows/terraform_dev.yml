@@ -29,7 +29,7 @@ jobs:
       - name: Create Storage Account (if not exists)
         id: create_storage_account
         run: |
-          az storage account show --name ${{ vars.AZ_BASE_STORAGE }} --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} || az storage account create --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} --name ${{ secrets.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
+          az storage account show --name ${{ vars.AZ_BASE_STORAGE }} --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} || az storage account create --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} --name ${{ vars.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
 
       - name: Create Storage Container (if not exists)
         id: create_storage_container
