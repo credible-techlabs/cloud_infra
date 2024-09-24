@@ -34,7 +34,7 @@ jobs:
       - name: Create Storage Container (if not exists)
         id: create_storage_container
         run: |
-          az storage container show --name ${{ vars.AZ_BASE_CONTAINER }} --account-name ${{ vars.AZ_BASE_STORAGE }} || az storage container create --account-name ${{ vars.AZ_BASE_STORAGE }} --name ${{ secrets.AZ_BASE_CONTAINER }}
+          az storage container show --name ${{ vars.AZ_BASE_CONTAINER }} --account-name ${{ vars.AZ_BASE_STORAGE }} || az storage container create --account-name ${{ vars.AZ_BASE_STORAGE }} --name ${{ vars.AZ_BASE_CONTAINER }}
 
     outputs:
       STORAGE_ACCOUNT_NAME: ${{ steps.create_storage_account.outputs.storage_account_name }}
