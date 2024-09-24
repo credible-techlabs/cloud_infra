@@ -41,51 +41,51 @@ jobs:
       RESOURCE_GROUP_NAME: ${{ steps.create_rg.outputs.resource_group_name }}
       CONTAINER_NAME: ${{ steps.create_storage_container.outputs.container_name }}
 
-  terraform_apply:
-    name: 'Terraform Apply'
-    runs-on: ubuntu-latest
-    needs: bootstrapping
+  # terraform_apply:
+  #   name: 'Terraform Apply'
+  #   runs-on: ubuntu-latest
+  #   needs: bootstrapping
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.5.0
 
-      - name: Terraform Init
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        run: |
-          cd env/dev/deploy
-          terraform init \
-            -backend-config="storage_account_name=${{ needs.bootstrapping.outputs.STORAGE_ACCOUNT_NAME }}" \
-            -backend-config="container_name=${{ needs.bootstrapping.outputs.CONTAINER_NAME }}" \
-            -backend-config="resource_group_name=${{ needs.bootstrapping.outputs.RESOURCE_GROUP_NAME }}" \
-            -backend-config="key=terraform_dev.tfstate"
+  #     - name: Terraform Init
+  #       env:
+  #         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  #         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  #         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  #         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  #       run: |
+  #         cd env/dev/deploy
+  #         terraform init \
+  #           -backend-config="storage_account_name=${{ needs.bootstrapping.outputs.STORAGE_ACCOUNT_NAME }}" \
+  #           -backend-config="container_name=${{ needs.bootstrapping.outputs.CONTAINER_NAME }}" \
+  #           -backend-config="resource_group_name=${{ needs.bootstrapping.outputs.RESOURCE_GROUP_NAME }}" \
+  #           -backend-config="key=terraform_dev.tfstate"
 
-      - name: Terraform Plan
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        run: |
-          cd env/dev/deploy
-          terraform plan -out=tfplan
+  #     - name: Terraform Plan
+  #       env:
+  #         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  #         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  #         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  #         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  #       run: |
+  #         cd env/dev/deploy
+  #         terraform plan -out=tfplan
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        run: |
-          cd env/dev/deploy
-          terraform apply -auto-approve tfplan
+  #     - name: Terraform Apply
+  #       if: github.ref == 'refs/heads/main'
+  #       env:
+  #         ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  #         ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  #         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  #         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  #       run: |
+  #         cd env/dev/deploy
+  #         terraform apply -auto-approve tfplan
