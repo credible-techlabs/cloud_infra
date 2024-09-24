@@ -1,0 +1,6 @@
+resource_group_name  = "infra_Dev"
+location             = "East US"
+vnet_name            = "myvnet"
+subnet_name          = "mysubnet"
+storage_account_name = "medxdev0001"
+container_name       = "devterraform"
