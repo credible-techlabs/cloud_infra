@@ -23,19 +23,29 @@ jobs:
 
       - name: Create Resource Group (if not exists)
         id: create_rg
-        run: |
-          az group show --name ${{ vars.AZ_BASE_RESOURCE_GROUP }} || az group create --name ${{ vars.AZ_BASE_RESOURCE_GROUP }} --location ${{ vars.AZ_BASE_LOCATION }}
-
+        run: |         
+          if ! az group show --name ${{ vars.AZ_BASE_RESOURCE_GROUP }} &> /dev/null; then
+            az group create --name ${{ vars.AZ_BASE_RESOURCE_GROUP }} --location ${{ vars.AZ_BASE_LOCATION }}
+          else
+            echo "Resource group ${{ vars.AZ_BASE_RESOURCE_GROUP }} already exists"
+          fi
       - name: Create Storage Account (if not exists)
         id: create_storage_account
         run: |
-          az storage account show --name ${{ vars.AZ_BASE_STORAGE }} --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} || az storage account create --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} --name ${{ vars.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
+          if ! az storage account show --name ${{ vars.AZ_BASE_STORAGE }} --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} &> /dev/null; then
+            az storage account create --resource-group ${{ vars.AZ_BASE_RESOURCE_GROUP }} --name ${{ vars.AZ_BASE_STORAGE }} --sku Standard_LRS --encryption-services blob --kind StorageV2
+          else
+            echo "Storage account ${{ vars.AZ_BASE_STORAGE }} already exists"
+          fi
 
       - name: Create Storage Container (if not exists)
         id: create_storage_container
         run: |
-          az storage container show --name ${{ vars.AZ_BASE_CONTAINER }} --account-name ${{ vars.AZ_BASE_STORAGE }} || az storage container create --account-name ${{ vars.AZ_BASE_STORAGE }} --name ${{ vars.AZ_BASE_CONTAINER }}
-
+          if ! az storage container show --name ${{ vars.AZ_BASE_CONTAINER }} --account-name ${{ vars.AZ_BASE_STORAGE }} &> /dev/null; then
+            az storage container create --account-name ${{ vars.AZ_BASE_STORAGE }} --name ${{ vars.AZ_BASE_CONTAINER }}
+          else
+            echo "Storage container ${{ vars.AZ_BASE_CONTAINER }} already exists"
+          fi
     outputs:
       STORAGE_ACCOUNT_NAME: ${{ steps.create_storage_account.outputs.storage_account_name }}
       RESOURCE_GROUP_NAME: ${{ steps.create_rg.outputs.resource_group_name }}
