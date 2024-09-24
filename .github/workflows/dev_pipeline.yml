@@ -1,0 +1,16 @@
+# .github/workflows/dev_pipeline.yml
+name: Dev Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/common_pipeline.yml
+    with:
+      env_name: dev
+      working_dir: env/dev
+      terraform_state_key: "terraform_dev.tfstate"

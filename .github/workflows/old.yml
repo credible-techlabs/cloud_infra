@@ -1,9 +1,9 @@
-name: 'dev_infra_pipeline'
+name: 'Dev Deployment'
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 permissions:
@@ -46,11 +46,6 @@ jobs:
           else
             echo "Storage container ${{ vars.AZ_BASE_CONTAINER }} already exists"
           fi
-    outputs:
-      STORAGE_ACCOUNT_NAME: ${{ vars.AZ_BASE_STORAGE }}
-      RESOURCE_GROUP_NAME: ${{ vars.AZ_BASE_RESOURCE_GROUP }}
-      CONTAINER_NAME: ${{ vars.AZ_BASE_CONTAINER }}
-
   terraform_apply:
     name: 'Terraform Apply'
     runs-on: ubuntu-latest
@@ -72,11 +67,11 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         run: |
-          cd env/dev/deploy
+          cd env/dev
           terraform init \
-            -backend-config="storage_account_name=${{ needs.bootstrapping.outputs.STORAGE_ACCOUNT_NAME }}" \
-            -backend-config="container_name=${{ needs.bootstrapping.outputs.CONTAINER_NAME }}" \
-            -backend-config="resource_group_name=${{ needs.bootstrapping.outputs.RESOURCE_GROUP_NAME }}" \
+            -backend-config="storage_account_name=${{ vars.AZ_BASE_STORAGE }}" \
+            -backend-config="container_name=${{ vars.AZ_BASE_CONTAINER }}" \
+            -backend-config="resource_group_name=${{ vars.AZ_BASE_RESOURCE_GROUP }}" \
             -backend-config="key=terraform_dev.tfstate"
 
       - name: Terraform Plan
@@ -86,7 +81,7 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         run: |
-          cd env/dev/deploy
+          cd env/dev
           terraform plan -out=tfplan
 
       - name: Terraform Apply
@@ -97,5 +92,5 @@ jobs:
           ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
         run: |
-          cd env/dev/deploy
+          cd env/dev
           terraform apply -auto-approve tfplan
