@@ -1,4 +1,4 @@
-# .github/workflows/common_pipeline.yml
+# .github/workflows/common_one.yml
 name: 'Common Pipeline'
 
 on:
