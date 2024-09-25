@@ -1,3 +1,7 @@
+provider "azurerm" {
+  features {}
+}
+
 # Call the Resource Group module
 module "resource_group" {
   source   = "../../terraform/modules/resource_group"
